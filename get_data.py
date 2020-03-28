@@ -2,6 +2,7 @@ import boto3
 import shutil
 import os
 import pandas as pd
+import numpy as np
 
 
 class ImportData:
@@ -12,6 +13,7 @@ class ImportData:
         gdp_data=False,
         fx_reserves_data=False,
         fx_price_data=False,
+        interest_rate_data=False,
     ):
 
         """
@@ -58,7 +60,15 @@ class ImportData:
                 os.mkdir(PATH_DIR)
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
 
-    def create_dataframe(self):
+        if interest_rate_data is True:
+            PATH = "datasets/interest_rates/interest_rates.zip"
+            if "interest_rates" not in os.listdir("datasets"):
+                PATH_DIR = "datasets/interest_rates"
+                os.mkdir(PATH_DIR)
+            self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
+            shutil.unpack_archive(PATH, extract_dir="datasets/interest_rates/")
+
+    def create_gdp_dataframe(self):
         """
         This function loops through all of the dataset folders and creates a dataframe combining all of the information.
         """
@@ -83,3 +93,72 @@ class ImportData:
                     dataframe, left_index=True, right_index=True
                 )
         return dataframe_complete
+
+    def create_rates_dataframe(self, preferred_rate="Government Bonds"):
+        """
+        This function loops through all of the dataset folders and creates a dataframe combining all of the information.
+        """
+        if preferred_rate == "Government Bonds":
+            alt_rate = "Treasury Bill Rate"
+        elif preferred_rate == "Treasury Bill Rate":
+            alt_rate = "Government Bonds"
+        else:
+            print(
+                "Please select either: Government Bonds ... or ... Treasury Bill Rate"
+            )
+        dataframe_complete = None
+        PATH = "datasets/interest_rates"
+        dir_list = os.listdir(PATH)
+        for filename in dir_list:
+            if filename.endswith("zip"):
+                continue
+            temp_df = pd.read_excel(PATH + "/" + filename, header=None)
+            temp_df = temp_df.iloc[:, 1:]
+            dti = pd.date_range("2008-01-01", periods=24, freq="M")
+            if "no data" not in temp_df.loc[:, 1].to_list() and (
+                "Government Bonds" in temp_df.loc[:, 1].to_list()
+                or "Treasury Bill Rate" in temp_df.loc[:, 1].to_list()
+            ):
+                country_name = temp_df.iloc[2, 0]
+                print
+                try:
+                    data_for_df = (
+                        temp_df[temp_df.loc[:, 1] == preferred_rate]
+                        .iloc[:, 4:]
+                        .values[0]
+                    )
+                except:
+                    print(
+                        "Warning: We are using",
+                        alt_rate,
+                        "instead of",
+                        preferred_rate,
+                        "for",
+                        country_name,
+                    )
+                    data_for_df = (
+                        temp_df[temp_df.loc[:, 1] == alt_rate].iloc[:, 4:].values[0]
+                    )
+                dataframe = pd.DataFrame({country_name: data_for_df}, index=dti,)
+
+            else:
+                country_name = temp_df.iloc[2, 0]
+                print(
+                    country_name,
+                    "has no data. It will be included in the dataframe with nan (not a number) as the entries.",
+                )
+                dataframe = pd.DataFrame({country_name: np.empty((24,))}, index=dti,)
+
+            if dataframe_complete is None:
+                dataframe_complete = dataframe
+            else:
+                dataframe_complete = dataframe_complete.merge(
+                    dataframe, left_index=True, right_index=True
+                )
+        return dataframe_complete
+
+
+df = ImportData(
+    gdp_data=True, fx_reserves_data=True, fx_price_data=True, interest_rate_data=True
+).create_rates_dataframe()
+print(df)
