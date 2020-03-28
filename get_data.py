@@ -181,3 +181,26 @@ class ImportData:
                     dataframe, left_index=True, right_index=True
                 )
         return dataframe_complete
+
+    def create_fxreserves_dataframe(self):
+        dataframe_complete = None
+        PATH = "datasets/fxreserves"
+        dir_list = os.listdir(PATH)
+        for filename in dir_list:
+            if filename.endswith("zip"):
+                continue
+            country = pd.read_csv(PATH + "/" + filename)["Country"].iloc[0]
+            temp_df = pd.DataFrame(
+                pd.read_csv(PATH + "/" + filename, skiprows=2, index_col="Date")[
+                    "Close"
+                ]
+            )
+            temp_df.index = pd.to_datetime(temp_df.index)
+            temp_df = temp_df.rename(columns={"Close": country})
+            if dataframe_complete is None:
+                dataframe_complete = temp_df
+            else:
+                dataframe_complete = dataframe_complete.merge(
+                    temp_df, left_index=True, right_index=True
+                )
+        return dataframe_complete
