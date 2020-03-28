@@ -42,7 +42,9 @@ class ImportData:
             if "gdp" not in os.listdir("datasets"):
                 PATH_DIR = "datasets/gdp"
                 os.mkdir(PATH_DIR)
+            print("*** DOWNLOADING GDP DATA ***")
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
+            print("*** UNPACKING GDP DATA ***")
             shutil.unpack_archive(PATH, extract_dir="datasets/gdp/")
 
         if fx_reserves_data is True:
@@ -50,7 +52,9 @@ class ImportData:
             if "fxreserves" not in os.listdir("datasets"):
                 PATH_DIR = "datasets/fxreserves"
                 os.mkdir(PATH_DIR)
+            print("*** DOWNLOADING FX RESERVES DATA ***")
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
+            print("*** UNPACKING FX RESERVES DATA ***")
             shutil.unpack_archive(PATH, extract_dir="datasets/fxreserves/")
 
         if fx_price_data is True:
@@ -58,6 +62,7 @@ class ImportData:
             if "primary" not in os.listdir("datasets"):
                 PATH_DIR = "datasets/primary"
                 os.mkdir(PATH_DIR)
+            print("*** DOWNLOADING FX PRICE DATA ***")
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
 
         if interest_rate_data is True:
@@ -65,7 +70,9 @@ class ImportData:
             if "interest_rates" not in os.listdir("datasets"):
                 PATH_DIR = "datasets/interest_rates"
                 os.mkdir(PATH_DIR)
+            print("*** DOWNLOADING RATES DATA ***")
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
+            print("*** UNPACKING RATES DATA ***")
             shutil.unpack_archive(PATH, extract_dir="datasets/interest_rates/")
 
     def create_gdp_dataframe(self):
