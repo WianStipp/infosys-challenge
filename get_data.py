@@ -46,6 +46,7 @@ class ImportData:
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
             print("*** UNPACKING GDP DATA ***")
             shutil.unpack_archive(PATH, extract_dir="datasets/gdp/")
+            print("")
 
         if fx_reserves_data is True:
             PATH = "datasets/fxreserves/fxreserves.zip"
@@ -56,6 +57,7 @@ class ImportData:
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
             print("*** UNPACKING FX RESERVES DATA ***")
             shutil.unpack_archive(PATH, extract_dir="datasets/fxreserves/")
+            print("")
 
         if fx_price_data is True:
             PATH = "datasets/primary/Foreign_Exchange_Rates.csv"
@@ -64,6 +66,7 @@ class ImportData:
                 os.mkdir(PATH_DIR)
             print("*** DOWNLOADING FX PRICE DATA ***")
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
+            print("")
 
         if interest_rate_data is True:
             PATH = "datasets/interest_rates/interest_rates.zip"
@@ -74,6 +77,21 @@ class ImportData:
             self.s3.download_file(Bucket=BUCKET_NAME, Key=PATH, Filename=PATH)
             print("*** UNPACKING RATES DATA ***")
             shutil.unpack_archive(PATH, extract_dir="datasets/interest_rates/")
+            print("")
+
+    def create_price_dataframe(self):
+        PATH = "datasets/primary/Foreign_Exchange_Rates.csv"
+        dataframe = pd.read_csv(PATH, index_col="Unnamed: 0")
+        # Set the index as the Time Series column
+        dataframe.index = dataframe[dataframe.columns[0]]
+        # Drop that column as it is now the index
+        dataframe = dataframe.drop(dataframe.columns[0], axis=1)
+        # Drop rows that have no data
+        columns = dataframe.columns
+        filter_ND = dataframe[columns[0]] != "ND"
+        dataframe = dataframe[filter_ND]
+        print("There are", len(columns), "different currency pairs in this dataframe.")
+        return dataframe
 
     def create_gdp_dataframe(self):
         """
