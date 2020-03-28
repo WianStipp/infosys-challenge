@@ -156,9 +156,3 @@ class ImportData:
                     dataframe, left_index=True, right_index=True
                 )
         return dataframe_complete
-
-
-df = ImportData(
-    gdp_data=True, fx_reserves_data=True, fx_price_data=True, interest_rate_data=True
-).create_rates_dataframe()
-print(df)
