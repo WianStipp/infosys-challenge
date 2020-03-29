@@ -8,8 +8,8 @@ import numpy as np
 class ImportData:
     def __init__(
         self,
-        AWS_ACCESS_KEY_ID="AKIA3M3UMVFNW3OVFPFS",
-        AWS_SECRET_ACCESS_KEY="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",
+        AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY,
         gdp_data=False,
         fx_reserves_data=False,
         fx_price_data=False,
