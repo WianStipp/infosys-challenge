@@ -204,3 +204,30 @@ class ImportData:
                     temp_df, left_index=True, right_index=True
                 )
         return dataframe_complete
+
+    def create_reservesByGDP_dataframe(self):
+        df_gdp = self.create_gdp_dataframe()
+        df_reserves = self.create_fxreserves_dataframe()
+        # combine the reserves and gdp dataframes
+        composite_df = pd.merge(
+            left=df_reserves, right=df_gdp, left_index=True, right_index=True
+        )
+        # fix an incorrect name
+        composite_df = composite_df.rename(columns={"World": "Euro Area"})
+        # make a list of the 22 countries we are comparing with
+        countries = composite_df.columns[:22].to_list()
+        # create a blank dataframe
+        resGDP_df = pd.DataFrame(columns=countries)
+        # populate this dataframe with the FX Reserve-to-GDP ratio for each country
+        for index in range(22):
+            for column in composite_df.columns.to_list():
+                if column.startswith(countries[index][:4]):
+                    if column.endswith("GDP"):
+                        gdp_data = composite_df[column].values
+                    else:
+                        fx_res_data = composite_df[column].values
+            resGDP_df[countries[index]] = fx_res_data / gdp_data.astype("float32")
+        # add the datetime to this dataframe
+        resGDP_df.index = composite_df.index
+        print("Dataframe Successfully Created. The shape is", resGDP_df.shape)
+        return resGDP_df
