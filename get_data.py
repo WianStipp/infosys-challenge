@@ -3,6 +3,7 @@ import shutil
 import os
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ImportData:
@@ -90,6 +91,12 @@ class ImportData:
         columns = dataframe.columns
         filter_ND = dataframe[columns[0]] != "ND"
         dataframe = dataframe[filter_ND]
+        filter_ND = (
+            dataframe[["INDIA - INDIAN RUPEE/US$", "TAIWAN - NEW TAIWAN DOLLAR/US$"]]
+            != "ND"
+        )
+        dataframe = dataframe[filter_ND]
+        dataframe = dataframe.apply(pd.to_numeric)
         print("There are", len(columns), "different currency pairs in this dataframe.")
         return dataframe
 
