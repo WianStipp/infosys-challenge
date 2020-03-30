@@ -91,12 +91,7 @@ class ImportData:
         columns = dataframe.columns
         filter_ND = dataframe[columns[0]] != "ND"
         dataframe = dataframe[filter_ND]
-        filter_ND = (
-            dataframe[["INDIA - INDIAN RUPEE/US$", "TAIWAN - NEW TAIWAN DOLLAR/US$"]]
-            != "ND"
-        )
-        dataframe = dataframe[filter_ND]
-        dataframe = dataframe.apply(pd.to_numeric)
+
         print("There are", len(columns), "different currency pairs in this dataframe.")
         return dataframe
 
