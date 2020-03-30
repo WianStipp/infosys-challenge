@@ -92,6 +92,9 @@ class ImportData:
         filter_ND = dataframe[columns[0]] != "ND"
         dataframe = dataframe[filter_ND]
 
+        ND_is = dataframe.index[np.where(dataframe.values == "ND")[0]]
+        dataframe = dataframe.drop(ND_is)
+        dataframe = dataframe.apply(pd.to_numeric)
         print("There are", len(columns), "different currency pairs in this dataframe.")
         return dataframe
 
